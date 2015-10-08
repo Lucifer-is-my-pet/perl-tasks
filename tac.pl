@@ -1,7 +1,22 @@
-# $\ = "\n";
+=head1 NAME
+tac
+
+=head1 SYNOPSIS
+C<perl tac.pl %filename%>
+
+=head1 USAGE
+prints lines of a %filename% from end to start
+
+=head1 AUTHOR
+Guralnik Darya
+
+=head1 SUBROUTINES/METHODS
+C<findPosition> returns position of '\n'
+=cut
 
 $fname = shift @ARGV;
-open $text, '<', 'C:\Downloads\code.txt' or die "Something's wrong with your file, $!";
+open $text, '<', $fname or die "Something's wrong with your file, $!";
+
 $fileSize = -s $text;
 $position = $fileSize;
 # print $fileSize;
@@ -12,7 +27,7 @@ while ($position > 0) {
 	$oneMoreText = readline($text);
 	$len = length $oneMoreText;
 	push @lengths, $len; 
-	if ($len != 1 or $lengths[-2] != 1) { # если текущая длина 1 и предыдущая длина один, не выводим
+	if ($len != 1 or $lengths[-2] != 1) { # если текущая длина 1 и предыдущая длина один, не выводим (патаму шта выводятся две пустые строки подряд там, где должна быть одна)
 		print($oneMoreText);
 	}
 }
@@ -29,8 +44,3 @@ sub findPosition {
 	# print $pos;	
 	return $pos;
 }
-
-# foreach $n (@lengths) {
-# 	if (length $n == 1)
-#     print($n . " ");
-# }
