@@ -7,7 +7,7 @@ C<perl tac.pl %filename%>
 =head1 USAGE
 prints lines of a %filename% from end to start
 
-=head1 AUTHOR
+=head1 AUTHORP
 Guralnik Darya
 
 =head1 SUBROUTINES/METHODS
@@ -20,16 +20,23 @@ open $text, '<', $fname or die "Something's wrong with your file, $!";
 $fileSize = -s $text;
 $position = $fileSize;
 # print $fileSize;
-@lengths = (); # костыль
+$currLen = 0;
+$lastLen = 0;
 while ($position > 0) {
 	$position = &findPosition($position);
-	seek($text, $position + 2, 0);
+	if ($position != 0) {
+		seek($text, $position + 2, 0);
+	}
+	else {
+		seek($text, $position, 0);
+	}	
 	$oneMoreText = readline($text);
-	$len = length $oneMoreText;
-	push @lengths, $len; 
-	if ($len != 1 or $lengths[-2] != 1) { # если текущая длина 1 и предыдущая длина один, не выводим (патаму шта выводятся две пустые строки подряд там, где должна быть одна)
+	$currLen = length $oneMoreText;
+	if ($currLen != 1 or $lastLen != 1) { # если текущая длина 1 и предыдущая длина один,
+										  # не выводим (так как выводятся две пустые строки подряд там, где должна быть одна)
 		print($oneMoreText);
 	}
+	$lastLen = $currLen;
 }
 
 sub findPosition {
@@ -39,7 +46,7 @@ sub findPosition {
 	while ($char ne "\n" and $pos > 0) {
 		$char = getc $text;
 		seek($text, $pos - 1, 0);
-		$pos = tell($text);
+		$pos -= 1;
 	}
 	# print $pos;	
 	return $pos;
