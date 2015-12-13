@@ -13,6 +13,7 @@ Guralnik Darya
 =head1 SUBROUTINES/METHODS
 C<getPriority> returns priority of operator
 =cut
+# https://en.wikipedia.org/wiki/Shunting-yard_algorithm
 
 $\ = "\n";
 @priorities = (
@@ -21,14 +22,14 @@ $\ = "\n";
 
 sub getPriority {
 	for $i(0 .. @priorities) {
-		if (index($priorities[$i], $_[0]) > -1) { # проверить index
+		if (index($priorities[$i], $_[0]) > -1) {
 			return $i;
 		}
 	}
 }
 
 @expressionArr = ();
-# не может быть иначе, выражение подаётся с пробелами	
+# не может быть иначе, выражение подаётся с пробелами
 $expression = join("", @ARGV);
 push @expressionArr, @ARGV;
 $anwser1 = eval $expression;
@@ -55,8 +56,8 @@ for $i(0 .. @expressionArr) {
 		push @stack, $expressionArr[$i];
 	}
 	elsif ($expressionArr[$i] =~ m%\)%) { # пока верхним элементом стека не станет (,
-											# выталкиваем элементы из стека в выходную строку.
-											# ( удаляется из стека, но в выходную строку не добавляется
+										# выталкиваем элементы из стека в выходную строку.
+										# ( удаляется из стека, но в выходную строку не добавляется
 		$tempBrace = pop @stack;
 		while (!($tempBrace =~ m%\(%)) {
 			$output .= $tempBrace . " ";
@@ -72,8 +73,8 @@ while (@stack > 0) {
 	}	
 }
 
-print $output;
-# 1.05 ** ( 1 + 2 ** 2 * 3 ** ( 4 * 2 - ( 5 + 3 ) / 4 * 2 ) )
+print "postfix: " . $output;
+
 # теперь у нас есть постфиксное выражение с пробелами
 @splittedRPN = split (" ", $output);
 $len = @splittedRPN;
@@ -91,10 +92,12 @@ for $i(0 .. $len) {
 			$num2 = "(" . $num2 . ")";
 		}
 		$newNum = eval $num1 . $splittedRPN[$i] . $num2;
+		# $newNum = sprintf("%.3f", $newNum);
+		# print $newNum;
 		
 		push @arr, $newNum;
 	}
 }
 
-print $arr[0];
-print $anwser1; # для сравнения
+print "infix result: " . $anwser1; # для сравнения
+print "postfix result: " . $arr[0];
