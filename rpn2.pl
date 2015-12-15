@@ -2,60 +2,54 @@
 Reversed Polish Notation
 
 =head1 SYNOPSIS
-C<perl rpn.pl %math expression with spaces%>
+C<perl rpn.pl %math expression with or without spaces%>
 
 =head1 USAGE
-turns ordinary expression into RPN and returns the result
+turns ordinary infix expression into RPN and returns the results of both of them
 
 =head1 AUTHOR
 Guralnik Darya
 
 =head1 SUBROUTINES/METHODS
-C<getPriority> returns priority of operator
+C<stringToArr> turns input string into array of operators and operands
 =cut
-# https://en.wikipedia.org/wiki/Shunting-yard_algorithm
 
 $\ = "\n";
-@priorities = (
-   '()', '+-', '*/'
-);
 
-sub getPriority {
-	for $i(0 .. @priorities) {
-		if (index($priorities[$i], $_[0]) > -1) {
-			return $i;
-		}
-	}
-}
+%priority = ('(' => 0, ')' => 0, '+' => 1, '-' => 1, '*' => 2, '/' => 2);
 
 @expressionArr = ();
-# не может быть иначе, выражение подаётся с пробелами
+if (@ARGV == 1) {
+	$input = @ARGV[0];
+	@expressionArr = stringToArr($input);
+} else {
+	push @expressionArr, @ARGV;
+}
 $expression = join("", @ARGV);
-push @expressionArr, @ARGV;
 $anwser1 = eval $expression;
 
 $output = "";
 @stack = ();
 
-for $i(0 .. @expressionArr) {
-	if ($expressionArr[$i] =~ m%\d%) {
-		$output .= $expressionArr[$i] . " ";
+for my $expr(@expressionArr) {
+	if ($expr =~ m%\d%) {
+		$output .= $expr . " ";
 	}
-	elsif ($expressionArr[$i] =~ m%[\*]{2}%) { # право-ассоциированный
-		push @stack, $expressionArr[$i];
+	elsif ($expr =~ m%[\*]{2}%) { # право-ассоциированный
+		push @stack, $expr;
 	}
-	elsif ($expressionArr[$i] =~ m%\(%) { # не должна оказаться в выходной строке
-		push @stack, $expressionArr[$i];
+	elsif ($expr =~ m%\(%) { # не должна оказаться в выходной строке
+		push @stack, $expr;
 	}
-	elsif ($expressionArr[$i] =~ m%[\+\-\*/]%) {
+	elsif ($expr =~ m%[\+\-\*/]%) {
 		
-		if (getPriority($expressionArr[$i]) <= getPriority($stack[-1])) {
+		if ($priority{$expr} <= $priority{$stack[-1]}) {
 			$tempOperator = pop @stack;
 			$output .= $tempOperator . " ";
 		}
-		push @stack, $expressionArr[$i];
+		push @stack, $expr;
 	}
-	elsif ($expressionArr[$i] =~ m%\)%) { # пока верхним элементом стека не станет (,
+	elsif ($expr =~ m%\)%) { # пока верхним элементом стека не станет (,
 										# выталкиваем элементы из стека в выходную строку.
 										# ( удаляется из стека, но в выходную строку не добавляется
 		$tempBrace = pop @stack;
@@ -77,27 +71,71 @@ print "postfix: " . $output;
 
 # теперь у нас есть постфиксное выражение с пробелами
 @splittedRPN = split (" ", $output);
-$len = @splittedRPN;
 @arr = ();
-for $i(0 .. $len) {
-	if ($splittedRPN[$i] =~ m/\d+/) {
-		push @arr, $splittedRPN[$i];
+for my $elem(@splittedRPN) {
+	if ($elem =~ m/\d+/) {
+		push @arr, $elem;
 	} else {
 		$num2 = pop @arr;
 		$num1 = pop @arr;
-		if ($num1 < 0) {
-			$num1 = "(" . $num1 . ")";
+
+		if ($elem eq "+") {
+			$newNum = $num1 + $num2;
+		} elsif ($elem eq "-")  {
+			$newNum = $num1 - $num2;
+		} elsif ($elem eq "*") {
+			$newNum = $num1 * $num2;
+		} elsif ($elem eq "/") {
+			$newNum = $num1 / $num2;
+		} elsif ($elem eq "**") {
+			$newNum = $num1 ** $num2;
 		}
-		if ($num2 < 0) {
-			$num2 = "(" . $num2 . ")";
-		}
-		$newNum = eval $num1 . $splittedRPN[$i] . $num2;
-		# $newNum = sprintf("%.3f", $newNum);
-		# print $newNum;
-		
+		# print $newNum, " from ", $num1, " ", $num2;
 		push @arr, $newNum;
 	}
 }
 
-print "infix result: " . $anwser1; # для сравнения
+print "infix result: " . $anwser1;
 print "postfix result: " . $arr[0];
+
+sub stringToArr {
+	@result = ();
+	$number = "";
+	$deg = "";
+	for my $elem(split (//, $_[0])) { # элемент - число или операнд
+		if ($elem =~ m%\d%) {
+			$number .= $elem;
+			if (length $deg) { # отлавливаем умножение
+				push @result, $deg;
+				$deg = "";
+			}
+		} elsif ($elem eq "*") { # возможен операнд из двух знаков
+			if (length $deg) {
+				if (length $number) {
+					push @result, $number;
+					$number = "";
+				}
+				push @result, "**";
+				$deg = "";
+			} else {
+				$deg = "*";
+				if (length $number) {
+					push @result, $number;
+					$number = "";
+				}
+			}
+		} else {
+			if ($elem =~ m%[^+\-\(\)/]%) {
+				die "Wrong operator ", $elem;
+			}
+			if (length $number) {
+				push @result, $number;
+				$number = "";
+			}
+			push @result, $elem;
+		}
+	}
+	push @result, $number; # последнее число в ходе цикла не добавляется
+	# print(join ",", @result);
+	return @result;
+}
