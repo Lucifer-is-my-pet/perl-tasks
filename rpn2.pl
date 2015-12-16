@@ -16,7 +16,7 @@ C<stringToArr> turns input string into array of operators and operands
 
 $\ = "\n";
 
-%priority = ('(' => 0, ')' => 0, '+' => 1, '-' => 1, '*' => 2, '/' => 2);
+%priority = ('(' => 0, ')' => 0, '+' => 1, '-' => 1, '*' => 2, '/' => 2, '**' => 3);
 
 @expressionArr = ();
 if (@ARGV == 1) {
@@ -99,43 +99,45 @@ print "infix result: " . $anwser1;
 print "postfix result: " . $arr[0];
 
 sub stringToArr {
-	@result = ();
-	$number = "";
-	$deg = "";
-	for my $elem(split (//, $_[0])) { # элемент - число или операнд
-		if ($elem =~ m%\d%) {
-			$number .= $elem;
-			if (length $deg) { # отлавливаем умножение
-				push @result, $deg;
-				$deg = "";
-			}
-		} elsif ($elem eq "*") { # возможен операнд из двух знаков
-			if (length $deg) {
-				if (length $number) {
-					push @result, $number;
-					$number = "";
-				}
-				push @result, "**";
-				$deg = "";
-			} else {
-				$deg = "*";
-				if (length $number) {
-					push @result, $number;
-					$number = "";
-				}
-			}
-		} else {
-			if ($elem =~ m%[^+\-\(\)/]%) {
-				die "Wrong operator ", $elem;
-			}
-			if (length $number) {
-				push @result, $number;
-				$number = "";
-			}
-			push @result, $elem;
-		}
-	}
-	push @result, $number; # последнее число в ходе цикла не добавляется
-	# print(join ",", @result);
-	return @result;
+	split /(\*\*|\D)/, shift;
+	# хоть и длинный, зато свой и понятный
+	# @result = ();
+	# $number = "";
+	# $deg = "";
+	# for my $elem(split (//, $_[0])) { # элемент - число или операнд
+	# 	if ($elem =~ m%\d%) {
+	# 		$number .= $elem;
+	# 		if (length $deg) { # отлавливаем умножение
+	# 			push @result, $deg;
+	# 			$deg = "";
+	# 		}
+	# 	} elsif ($elem eq "*") { # возможен операнд из двух знаков
+	# 		if (length $deg) {
+	# 			if (length $number) {
+	# 				push @result, $number;
+	# 				$number = "";
+	# 			}
+	# 			push @result, "**";
+	# 			$deg = "";
+	# 		} else {
+	# 			$deg = "*";
+	# 			if (length $number) {
+	# 				push @result, $number;
+	# 				$number = "";
+	# 			}
+	# 		}
+	# 	} else {
+	# 		if ($elem =~ m%[^+\-\(\)/]%) {
+	# 			die "Wrong operator ", $elem;
+	# 		}
+	# 		if (length $number) {
+	# 			push @result, $number;
+	# 			$number = "";
+	# 		}
+	# 		push @result, $elem;
+	# 	}
+	# }
+	# push @result, $number; # последнее число в ходе цикла не добавляется
+	# # print(join ",", @result);
+	# return @result;
 }
