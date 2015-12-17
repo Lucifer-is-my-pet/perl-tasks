@@ -1,4 +1,21 @@
 use strict;
+
+=head1 NAME
+Finding emails and names
+
+=head1 SYNOPSIS
+C<perl email.pl %filename%>
+
+=head1 USAGE
+finds emails and corresponding names and prints them
+
+=head1 AUTHOR
+Guralnik Darya
+
+=head1 SUBROUTINES/METHODS
+C<findAllIndexes> finds indexes of all matches for given line and pattern
+=cut
+
 $\ = "\n";
 open my $text, '<', $ARGV[0] or die "Something's wrong with your file, $!";
 
