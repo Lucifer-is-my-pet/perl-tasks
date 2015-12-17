@@ -1,23 +1,36 @@
+use strict;
 $\ = "\n";
-open $text, '<', $ARGV[0] or die "Something's wrong with your file, $!";
+open my $text, '<', $ARGV[0] or die "Something's wrong with your file, $!";
 
-%emails = ();
+my %emails = ();
 while(<$text>) {
-	$line = $_;
+	my $line = $_;
     $line =~ m%mailto:%g;
-    $mailtoInd = $-[0];
-    $line =~ m%"%g; # находит только одно вхождение, последнее
-    $quoteInd = $-[0];
-    $emailInd = $mailtoInd + length("mailto:");
-    $email = substr($line, $emailInd, $quoteInd - $emailInd);
-    $line =~ m%>%g;
-    $greaterInd = $-[0] + 1;
-    $line =~ m%<%g; # находит только одно вхождение, последнее
-    $lessInd = $-[0];
-    $name = substr($line, $greaterInd, $lessInd - $greaterInd);
+    my $mailtoInd = $-[0];
+    my @indexes = findAllIndexes($line, '"');
+    my $quoteInd = $indexes[-1];
+    my $emailInd = $mailtoInd + length("mailto:");
+    my $email = substr($line, $emailInd, $quoteInd - $emailInd);
+
+    @indexes = findAllIndexes($line, ">");
+    my $greaterInd = $indexes[0] + 1;
+    @indexes = findAllIndexes($line, "<");
+    my $lessInd = $indexes[-1];
+    my $name = substr($line, $greaterInd, $lessInd - $greaterInd);
+
     $emails{$email} = $name;
 }
 
-while(($key, $value) = each %emails) {
+while((my $key, my $value) = each %emails) {
     print "$key => $value";
 };
+
+sub findAllIndexes {
+    my $line = $_[0];
+    my $pattern = $_[1];
+    my @indexes = ();
+    while ($line =~ /$pattern/g) {
+        push @indexes, $-[0];
+    }
+    return @indexes;
+}
