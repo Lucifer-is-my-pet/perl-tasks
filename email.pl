@@ -18,8 +18,7 @@ open my $file, '<', $ARGV[0] or die "Something's wrong with your file, $!";
 
 local $/;
 my $text = <$file>;
-my @info = ($text =~ /mailto:(.+)">(.+)</g) or next;
-my %emailsAndNames = @info;
+my %emailsAndNames = ($text =~ /mailto:([^\s\>\<]+)">([^\>\<]+)</g);
 while(my ($key, $value) = each %emailsAndNames) {
     print "$key => $value";
 };
