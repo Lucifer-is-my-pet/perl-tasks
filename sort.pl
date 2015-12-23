@@ -22,7 +22,7 @@ open my $text, '<', $ARGV[0] or die "Something's wrong with your file, $!";
 my %hashOfRepeats = ();
 
 while (my $line = <$text>) {
-	$line =~ s/(\.|,|;|\(|\)|")//g;
+	$line =~ s/[.,;\(\)"]//g;
 	my @splittedLine = split /\s/, $line;
 	fillTheDammitHash(\%hashOfRepeats, \@splittedLine);
 };
@@ -34,7 +34,7 @@ for my $key (sort { $hashOfRepeats{$b} <=> $hashOfRepeats{$a} } keys %hashOfRepe
 sub fillTheDammitHash {
     my ($href, $words) = @_;
     for my $word(@$words) {
-        if (exists $$href{lc $word}) {
+        if (exists $$href{lc $word}) { # забиваем на регистр
             $$href{lc $word} += 1;
         }
         else {
