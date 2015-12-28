@@ -1,6 +1,5 @@
 use strict;
 use warnings;
-use Data::Dumper;
 use lib 'C:/Моё/Универ/Perl';
 use FindBin qw( $RealBin );
 use lib $RealBin;
@@ -8,17 +7,26 @@ use Matrix;
 
 $\ = "\n";
 
-my @arr = (
-        [ 100, 200, 10 ],
-        [ "george", "jane", "elroy" ],
-        [ "homer", "marge", "bart" ],
-);
+# пример работы
 my $neo;
+my $duo;
 eval {
-    $neo = Matrix->new(\@arr);
+    $neo = Matrix->new([[ 10, 20, 30 ],
+        [ 10, 20, 30 ],
+        [ 10, 20, 30 ]]);
+    $duo = Matrix->new([[1], [1], [1]]);
 };
 if ($@) {
-    print "Матрица не прямоугольная! " . $@;
+    print "Матрица не прямоугольная или " . $@;
 } else {
     print $neo;
+}
+my $res;
+eval {
+    $res = $neo * $duo;
+};
+if ($@) {
+    print "Матрицы разных размерностей или " . $@;
+} else {
+    print $res;
 }
